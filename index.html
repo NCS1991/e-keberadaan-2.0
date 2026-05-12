@@ -25,30 +25,28 @@
     <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
   </div>
 
-  <!-- CONTAINER UTAMA -->
   <div id="app" class="max-w-4xl mx-auto p-4 md:p-8">
     
-    <!-- HEADER -->
     <header class="flex justify-between items-center mb-8 no-print">
       <div>
         <h1 class="text-2xl font-bold text-blue-800">eKeberadaan Guru</h1>
         <p class="text-sm text-gray-500">Sistem Pengurusan Keberadaan Digital</p>
       </div>
-      <button id="btnAdminView" onclick="toggleView('admin-login')" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg text-sm font-semibold transition">
-        Admin
-      </button>
-      <button id="btnUserView" onclick="toggleView('user')" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
-        Laman Utama
-      </button>
+      <div class="space-x-2">
+        <button id="btnAdminView" onclick="toggleView('admin-login')" class="bg-gray-200 hover:bg-gray-300 px-4 py-2 rounded-lg text-sm font-semibold transition">
+          Admin
+        </button>
+        <button id="btnUserView" onclick="toggleView('user')" class="hidden bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition">
+          Laman Utama
+        </button>
+      </div>
     </header>
 
-    <!-- PAPARAN PENGGUNA -->
     <section id="view-user" class="space-y-6">
       <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h2 class="text-lg font-semibold mb-4 border-b pb-2">Borang Keberadaan</h2>
         <form id="presenceForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
           
-          <!-- Nama dengan Autocomplete -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Guru</label>
             <input list="list-guru" id="inputNama" name="nama" placeholder="Taip nama anda..." required
@@ -56,7 +54,6 @@
             <datalist id="list-guru"></datalist>
           </div>
 
-          <!-- Urusan Keberadaan -->
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Urusan Keberadaan</label>
             <select id="urusanMain" name="urusan" onchange="toggleFields(this.value)" required
@@ -68,7 +65,6 @@
             </select>
           </div>
 
-          <!-- Dynamic Fields Container -->
           <div id="dynamicFields" class="space-y-4"></div>
 
           <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md transition transform active:scale-95">
@@ -78,7 +74,6 @@
       </div>
     </section>
 
-    <!-- LOGIN ADMIN -->
     <section id="view-admin-login" class="hidden">
       <div class="max-w-sm mx-auto bg-white p-8 rounded-xl shadow-lg text-center">
         <h2 class="text-xl font-bold mb-4">Log Masuk Admin</h2>
@@ -87,17 +82,14 @@
       </div>
     </section>
 
-    <!-- PAPARAN ADMIN -->
     <section id="view-admin-main" class="hidden no-print">
-      <!-- Sub Menu -->
       <nav class="flex space-x-2 mb-6 bg-white p-2 rounded-lg shadow-sm">
-        <button onclick="showAdminTab('dashboard')" class="flex-1 py-2 text-sm font-medium rounded-md hover:bg-blue-50 admin-tab-btn" id="btn-dash">Dashboard</button>
-        <button onclick="showAdminTab('rekod')" class="flex-1 py-2 text-sm font-medium rounded-md hover:bg-blue-50 admin-tab-btn" id="btn-rekod">Rekod</button>
-        <button onclick="showAdminTab('tetapan')" class="flex-1 py-2 text-sm font-medium rounded-md hover:bg-blue-50 admin-tab-btn" id="btn-tetapan">Tetapan</button>
-        <button onclick="logoutAdmin()" class="px-4 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50">Log Keluar</button>
+        <button onclick="showAdminTab('dashboard')" class="flex-1 py-2 text-sm font-medium rounded-md admin-tab-btn" id="btn-dash">Dashboard</button>
+        <button onclick="showAdminTab('rekod')" class="flex-1 py-2 text-sm font-medium rounded-md admin-tab-btn" id="btn-rekod">Rekod</button>
+        <button onclick="showAdminTab('tetapan')" class="flex-1 py-2 text-sm font-medium rounded-md admin-tab-btn" id="btn-tetapan">Tetapan</button>
+        <button onclick="logoutAdmin()" class="px-4 py-2 text-sm font-medium text-red-600 rounded-md hover:bg-red-50">Keluar</button>
       </nav>
 
-      <!-- Dashboard Tab -->
       <div id="tab-dashboard" class="admin-tab space-y-4">
         <h3 class="font-bold text-gray-700">Ringkasan Hari Ini (<span id="today-date"></span>)</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -115,12 +107,11 @@
           </div>
         </div>
         <div class="bg-gray-800 text-white p-4 rounded-lg text-center">
-          <p class="text-sm">Jumlah Keseluruhan Guru Tidak Berada di Sekolah</p>
+          <p class="text-sm">Jumlah Guru Tidak Berada di Sekolah</p>
           <p id="stat-total" class="text-4xl font-bold">0</p>
         </div>
       </div>
 
-      <!-- Rekod Tab -->
       <div id="tab-rekod" class="admin-tab hidden">
         <div class="flex flex-wrap gap-2 mb-4">
           <input type="date" id="filterDate" onchange="refreshRecords()" class="p-2 border rounded-lg text-sm">
@@ -130,7 +121,7 @@
             <option value="URUSAN RASMI">Urusan Rasmi</option>
             <option value="CUTI">Cuti</option>
           </select>
-          <button onclick="printFilteredData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Cetak PDF</button>
+          <button onclick="printFilteredData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Cetak Laporan</button>
         </div>
         <div class="overflow-x-auto bg-white rounded-lg border shadow-sm">
           <table class="w-full text-left text-sm">
@@ -139,7 +130,6 @@
                 <th class="p-3">Nama</th>
                 <th class="p-3">Urusan</th>
                 <th class="p-3">Tarikh</th>
-                <th class="p-3">Catatan</th>
                 <th class="p-3">Tindakan</th>
               </tr>
             </thead>
@@ -148,7 +138,6 @@
         </div>
       </div>
 
-      <!-- Tetapan Tab -->
       <div id="tab-tetapan" class="admin-tab hidden">
         <div class="bg-white p-6 rounded-lg border">
           <h3 class="font-bold mb-4">Tambah Guru Baharu</h3>
@@ -156,12 +145,11 @@
             <input type="text" id="newGuruNama" placeholder="Nama Penuh" class="p-3 border rounded-lg">
             <input type="text" id="newGuruJawatan" placeholder="Jawatan" class="p-3 border rounded-lg">
           </div>
-          <button onclick="submitNewTeacher()" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg font-semibold">Simpan</button>
+          <button onclick="submitNewTeacher()" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg font-semibold">Simpan Guru</button>
         </div>
       </div>
     </section>
 
-    <!-- PRINT VIEW AREA (Hidden from screen) -->
     <div id="print-area" class="hidden print-only p-8">
       <h1 class="text-2xl font-bold text-center mb-2">LAPORAN KEBERADAAN GURU</h1>
       <p class="text-center mb-6" id="print-subtitle"></p>
@@ -171,7 +159,7 @@
             <th class="border border-gray-400 p-2">Nama</th>
             <th class="border border-gray-400 p-2">Urusan</th>
             <th class="border border-gray-400 p-2">Butiran</th>
-            <th class="border border-gray-400 p-2">Tarikh/Masa</th>
+            <th class="border border-gray-400 p-2">Tarikh</th>
           </tr>
         </thead>
         <tbody id="print-tbody"></tbody>
@@ -181,55 +169,32 @@
   </div>
 
   <script>
-    // Kod ini memastikan sistem tidak ralat apabila dijalankan di luar Google Apps Script
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfBxp9f-b1ejtW8EOR3C79MXSzBQnMczSBtLm4eng1GaXK6buW-uI6LQM5g70WeCeMrA/exec";
+
+    // Bridge untuk Vercel berkomunikasi dengan GAS melalui Fetch API
     if (typeof google === 'undefined') {
       window.google = {
         script: {
           run: {
-            withSuccessHandler: function(callback) {
-              this.success = callback;
-              return this;
-            },
-            withFailureHandler: function(callback) {
-              this.failure = callback;
-              return this;
-            },
-            getInitialData: function() {
-              console.log("Simulasi: Mengambil data guru...");
-              setTimeout(() => {
-                this.success({
-                  guru: [
-                    {id: 'G001', nama: 'Ahmad bin Ali', jawatan: 'Guru Besar'},
-                    {id: 'G002', nama: 'Siti binti Abu', jawatan: 'Penolong Kanan'},
-                    {id: 'G003', nama: 'Zulkifli bin Kasim', jawatan: 'Penyelaras ICT'}
-                  ]
+            withSuccessHandler: function(callback) { this.success = callback; return this; },
+            withFailureHandler: function(callback) { this.failure = callback; return this; },
+            _call: async function(funcName, ...args) {
+              try {
+                const response = await fetch(SCRIPT_URL, {
+                  method: 'POST',
+                  body: JSON.stringify({ function: funcName, arguments: args })
                 });
-              }, 500);
+                const result = await response.json();
+                if (this.success) this.success(result);
+              } catch (err) {
+                if (this.failure) this.failure(err);
+              }
             },
-            saveRecord: function(data) {
-              console.log("Simulasi: Menyimpan rekod...", data);
-              setTimeout(() => this.success({success: true}), 500);
-            },
-            getAdminData: function() {
-              console.log("Simulasi: Mengambil rekod admin...");
-              setTimeout(() => {
-                const dummyDate = new Date().toLocaleDateString('en-GB').replace(/\//g, '-');
-                this.success([
-                  {
-                    'ID Rekod': 'R001', 'Nama': 'Ahmad bin Ali', 'Urusan Keberadaan': 'CUTI',
-                    'Tarikh Mula': dummyDate, 'Tarikh Tamat': dummyDate, 'Catatan': 'Simulasi Cuti Sakit'
-                  }
-                ]);
-              }, 500);
-            },
-            deleteRecord: function(id) {
-              console.log("Simulasi: Memadam rekod " + id);
-              setTimeout(() => this.getAdminData(), 500);
-            },
-            addTeacher: function(n, j) {
-              console.log("Simulasi: Menambah guru " + n);
-              setTimeout(() => this.success({success: true}), 500);
-            }
+            getInitialData: function() { this._call('getInitialData'); },
+            saveRecord: function(data) { this._call('saveRecord', data); },
+            getAdminData: function() { this._call('getAdminData'); },
+            deleteRecord: function(id) { this._call('deleteRecord', id); },
+            addTeacher: function(n, j) { this._call('addTeacher', n, j); }
           }
         }
       };
@@ -241,8 +206,9 @@
     window.onload = () => {
       showLoading(true);
       google.script.run.withSuccessHandler(data => {
-        masterGuru = data.guru;
+        masterGuru = data.guru || [];
         const dl = document.getElementById('list-guru');
+        dl.innerHTML = "";
         masterGuru.forEach(g => {
           let opt = document.createElement('option');
           opt.value = g.nama;
@@ -251,7 +217,6 @@
         showLoading(false);
       }).getInitialData();
 
-      // Set default date filter to today
       const today = new Date().toISOString().split('T')[0];
       document.getElementById('filterDate').value = today;
       document.getElementById('today-date').innerText = formatDateDisplay(today);
@@ -262,8 +227,10 @@
     }
 
     function toggleView(view) {
-      const views = ['user', 'admin-login', 'admin-main'];
-      views.forEach(v => document.getElementById(`view-${v}`).classList.add('hidden'));
+      document.getElementById('view-user').classList.add('hidden');
+      document.getElementById('view-admin-login').classList.add('hidden');
+      document.getElementById('view-admin-main').classList.add('hidden');
+      
       document.getElementById(`view-${view}`).classList.remove('hidden');
       
       document.getElementById('btnAdminView').classList.toggle('hidden', view !== 'user');
@@ -288,8 +255,7 @@
             <div><label class="block text-xs font-bold mb-1">Masa Keluar</label><input type="time" name="masaKeluar" required class="w-full p-2 border rounded"></div>
             <div><label class="block text-xs font-bold mb-1">Masa Masuk</label><input type="time" name="masaMasuk" required class="w-full p-2 border rounded"></div>
           </div>
-          <textarea name="catatan" placeholder="Catatan Tambahan" class="w-full p-2 border rounded"></textarea>
-        `;
+          <textarea name="catatan" placeholder="Catatan" class="w-full p-2 border rounded"></textarea>`;
       } else if(val === 'URUSAN RASMI') {
         html = `
           <select name="jenisUrusan" required class="w-full p-2 border rounded">
@@ -302,8 +268,7 @@
             <input type="text" name="tempat" placeholder="Tempat" class="p-2 border rounded">
             <input type="text" name="anjuran" placeholder="Anjuran" class="p-2 border rounded">
           </div>
-          <textarea name="catatan" placeholder="Catatan" class="w-full p-2 border rounded"></textarea>
-        `;
+          <textarea name="catatan" placeholder="Catatan" class="w-full p-2 border rounded"></textarea>`;
       } else if(val === 'CUTI') {
         html = `
           <select name="jenisCuti" required class="w-full p-2 border rounded">
@@ -313,8 +278,7 @@
             <option value="CUTI REHAT">CUTI REHAT</option>
           </select>
           ${commonDate}
-          <textarea name="catatan" placeholder="Catatan" class="w-full p-2 border rounded"></textarea>
-        `;
+          <textarea name="catatan" placeholder="Catatan" class="w-full p-2 border rounded"></textarea>`;
       }
       container.innerHTML = html;
     }
@@ -334,8 +298,7 @@
     }
 
     function checkAdminPass() {
-      const p = document.getElementById('adminPass').value;
-      if(p === 'Admin0123') {
+      if(document.getElementById('adminPass').value === 'Admin0123') {
         toggleView('admin-main');
         showAdminTab('dashboard');
       } else {
@@ -351,7 +314,6 @@
     function showAdminTab(tab) {
       document.querySelectorAll('.admin-tab').forEach(t => t.classList.add('hidden'));
       document.getElementById(`tab-${tab}`).classList.remove('hidden');
-      
       document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('bg-blue-600', 'text-white'));
       document.getElementById(`btn-${tab}`).classList.add('bg-blue-600', 'text-white');
     }
@@ -359,7 +321,7 @@
     function refreshRecords() {
       showLoading(true);
       google.script.run.withSuccessHandler(data => {
-        masterRekod = data;
+        masterRekod = data || [];
         updateDashboard();
         renderTable();
         showLoading(false);
@@ -373,6 +335,7 @@
     }
 
     function parseDate(str) {
+      if (!str) return new Date(0);
       const parts = str.split('-');
       return new Date(parts[2], parts[1] - 1, parts[0]);
     }
@@ -380,15 +343,12 @@
     function updateDashboard() {
       const today = new Date();
       today.setHours(0,0,0,0);
-      
       let counts = { 'KELUAR WAKTU BEKERJA / URUSAN DALAMAN': 0, 'URUSAN RASMI': 0, 'CUTI': 0 };
       
       masterRekod.forEach(r => {
         const start = parseDate(r['Tarikh Mula']);
-        const end = parseDate(r['Tarikh Tamat']);
-        if(today >= start && today <= end) {
-          counts[r['Urusan Keberadaan']]++;
-        }
+        const end = parseDate(r['Tarikh Tamat'] || r['Tarikh Mula']);
+        if(today >= start && today <= end) counts[r['Urusan Keberadaan']]++;
       });
 
       document.getElementById('stat-dalaman').innerText = counts['KELUAR WAKTU BEKERJA / URUSAN DALAMAN'];
@@ -401,26 +361,23 @@
       const filterDate = document.getElementById('filterDate').value;
       const filterType = document.getElementById('filterType').value;
       const targetDate = filterDate ? formatDateDisplay(filterDate) : null;
-      
       const tbody = document.getElementById('tableRecords');
       tbody.innerHTML = '';
 
       const filtered = masterRekod.filter(r => {
         const matchType = !filterType || r['Urusan Keberadaan'] === filterType;
-        const matchDate = !targetDate || r['Tarikh Mula'] === targetDate || (parseDate(targetDate) >= parseDate(r['Tarikh Mula']) && parseDate(targetDate) <= parseDate(r['Tarikh Tamat']));
+        const matchDate = !targetDate || r['Tarikh Mula'] === targetDate || (parseDate(targetDate) >= parseDate(r['Tarikh Mula']) && parseDate(targetDate) <= parseDate(r['Tarikh Tamat'] || r['Tarikh Mula']));
         return matchType && matchDate;
       });
 
       filtered.forEach(r => {
         const tr = document.createElement('tr');
-        tr.className = "border-b hover:bg-gray-50";
+        tr.className = "border-b text-xs";
         tr.innerHTML = `
           <td class="p-3 font-medium">${r['Nama']}</td>
-          <td class="p-3"><span class="text-xs px-2 py-1 rounded bg-gray-100">${r['Urusan Keberadaan']}</span></td>
-          <td class="p-3 text-xs">${r['Tarikh Mula']} ${r['Tarikh Tamat'] !== r['Tarikh Mula'] ? ' hingga ' + r['Tarikh Tamat'] : ''}</td>
-          <td class="p-3 text-xs text-gray-600">${r['Catatan'] || '-'}</td>
-          <td class="p-3"><button onclick="deleteRec('${r['ID Rekod']}')" class="text-red-500 hover:underline">Padam</button></td>
-        `;
+          <td class="p-3">${r['Urusan Keberadaan']}</td>
+          <td class="p-3">${r['Tarikh Mula']}</td>
+          <td class="p-3"><button onclick="deleteRec('${r['ID Rekod']}')" class="text-red-500">Padam</button></td>`;
         tbody.appendChild(tr);
       });
     }
@@ -449,35 +406,26 @@
       const filterDate = document.getElementById('filterDate').value;
       const filterType = document.getElementById('filterType').value;
       const targetDate = filterDate ? formatDateDisplay(filterDate) : "Semua Tarikh";
-      
       document.getElementById('print-subtitle').innerText = `Tarikh: ${targetDate} | Kategori: ${filterType || "Semua"}`;
-      
       const tbody = document.getElementById('print-tbody');
       tbody.innerHTML = '';
 
       const filtered = masterRekod.filter(r => {
         const targetDateFmt = filterDate ? formatDateDisplay(filterDate) : null;
         const matchType = !filterType || r['Urusan Keberadaan'] === filterType;
-        const matchDate = !targetDateFmt || r['Tarikh Mula'] === targetDateFmt || (parseDate(targetDateFmt) >= parseDate(r['Tarikh Mula']) && parseDate(targetDateFmt) <= parseDate(r['Tarikh Tamat']));
+        const matchDate = !targetDateFmt || r['Tarikh Mula'] === targetDateFmt || (parseDate(targetDateFmt) >= parseDate(r['Tarikh Mula']) && parseDate(targetDateFmt) <= parseDate(r['Tarikh Tamat'] || r['Tarikh Mula']));
         return matchType && matchDate;
       });
 
       filtered.forEach(r => {
-        let details = "";
-        if(r['Urusan Keberadaan'] === 'URUSAN RASMI') details = `${r['Jenis Urusan']}: ${r['Nama Program']} (${r['Tempat']})`;
-        else if(r['Urusan Keberadaan'] === 'CUTI') details = r['Jenis Cuti'];
-        else details = r['Urusan Keluar'];
-
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td class="border border-gray-400 p-2">${r['Nama']}</td>
           <td class="border border-gray-400 p-2">${r['Urusan Keberadaan']}</td>
-          <td class="border border-gray-400 p-2 text-xs">${details}<br><small>${r['Catatan']}</small></td>
-          <td class="border border-gray-400 p-2 text-xs">${r['Tarikh Mula']} ${r['Masa Keluar'] ? '<br>'+r['Masa Keluar']+' - '+r['Masa Masuk'] : ''}</td>
-        `;
+          <td class="border border-gray-400 p-2 text-xs">${r['Catatan'] || '-'}</td>
+          <td class="border border-gray-400 p-2 text-xs">${r['Tarikh Mula']}</td>`;
         tbody.appendChild(tr);
       });
-
       window.print();
     }
   </script>
