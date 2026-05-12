@@ -10,19 +10,17 @@
     body { font-family: 'Inter', sans-serif; }
     .loading-overlay {
       position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(255,255,255,0.8); display: flex; align-items: center;
+      background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center;
       justify-content: center; z-index: 9999;
     }
-    @media print {
-      .no-print { display: none !important; }
-      .print-only { display: block !important; }
-    }
+    @media print { .no-print { display: none !important; } .print-only { display: block !important; } }
   </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
 
-  <div id="loader" class="loading-overlay hidden">
-    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+  <div id="loader" class="loading-overlay">
+    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+    <p class="text-blue-800 font-semibold animate-pulse">Menyambung ke Pangkalan Data...</p>
   </div>
 
   <div id="app" class="max-w-4xl mx-auto p-4 md:p-8">
@@ -46,7 +44,6 @@
       <div class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
         <h2 class="text-lg font-semibold mb-4 border-b pb-2">Borang Keberadaan</h2>
         <form id="presenceForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
-          
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Nama Guru</label>
             <input list="list-guru" id="inputNama" name="nama" placeholder="Taip nama anda..." required
@@ -93,18 +90,9 @@
       <div id="tab-dashboard" class="admin-tab space-y-4">
         <h3 class="font-bold text-gray-700">Ringkasan Hari Ini (<span id="today-date"></span>)</h3>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="bg-blue-100 p-4 rounded-lg">
-            <p class="text-xs uppercase text-blue-600 font-bold">Urusan Dalaman</p>
-            <p id="stat-dalaman" class="text-3xl font-bold">0</p>
-          </div>
-          <div class="bg-green-100 p-4 rounded-lg">
-            <p class="text-xs uppercase text-green-600 font-bold">Urusan Rasmi</p>
-            <p id="stat-rasmi" class="text-3xl font-bold">0</p>
-          </div>
-          <div class="bg-orange-100 p-4 rounded-lg">
-            <p class="text-xs uppercase text-orange-600 font-bold">Cuti</p>
-            <p id="stat-cuti" class="text-3xl font-bold">0</p>
-          </div>
+          <div class="bg-blue-100 p-4 rounded-lg"><p class="text-xs uppercase text-blue-600 font-bold">Urusan Dalaman</p><p id="stat-dalaman" class="text-3xl font-bold">0</p></div>
+          <div class="bg-green-100 p-4 rounded-lg"><p class="text-xs uppercase text-green-600 font-bold">Urusan Rasmi</p><p id="stat-rasmi" class="text-3xl font-bold">0</p></div>
+          <div class="bg-orange-100 p-4 rounded-lg"><p class="text-xs uppercase text-orange-600 font-bold">Cuti</p><p id="stat-cuti" class="text-3xl font-bold">0</p></div>
         </div>
         <div class="bg-gray-800 text-white p-4 rounded-lg text-center">
           <p class="text-sm">Jumlah Guru Tidak Berada di Sekolah</p>
@@ -126,12 +114,7 @@
         <div class="overflow-x-auto bg-white rounded-lg border shadow-sm">
           <table class="w-full text-left text-sm">
             <thead class="bg-gray-50 border-b">
-              <tr>
-                <th class="p-3">Nama</th>
-                <th class="p-3">Urusan</th>
-                <th class="p-3">Tarikh</th>
-                <th class="p-3">Tindakan</th>
-              </tr>
+              <tr><th class="p-3">Nama</th><th class="p-3">Urusan</th><th class="p-3">Tarikh</th><th class="p-3">Tindakan</th></tr>
             </thead>
             <tbody id="tableRecords"></tbody>
           </table>
@@ -171,34 +154,44 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfBxp9f-b1ejtW8EOR3C79MXSzBQnMczSBtLm4eng1GaXK6buW-uI6LQM5g70WeCeMrA/exec";
 
-    // Bridge untuk Vercel berkomunikasi dengan GAS melalui Fetch API
-    if (typeof google === 'undefined') {
-      window.google = {
-        script: {
-          run: {
-            withSuccessHandler: function(callback) { this.success = callback; return this; },
-            withFailureHandler: function(callback) { this.failure = callback; return this; },
-            _call: async function(funcName, ...args) {
-              try {
-                const response = await fetch(SCRIPT_URL, {
-                  method: 'POST',
-                  body: JSON.stringify({ function: funcName, arguments: args })
-                });
-                const result = await response.json();
-                if (this.success) this.success(result);
-              } catch (err) {
-                if (this.failure) this.failure(err);
+    window.google = {
+      script: {
+        run: {
+          withSuccessHandler: function(cb) { this.success = cb; return this; },
+          withFailureHandler: function(cb) { this.failure = cb; return this; },
+          _call: async function(func, ...args) {
+            try {
+              const res = await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Penting untuk mengelakkan isu preflight CORS pada GAS
+                body: JSON.stringify({ function: func, arguments: args })
+              });
+              
+              // Kerana 'no-cors' tidak membenarkan membaca respon, 
+              // kita buat 'real' fetch untuk mendapatkan data bagi fungsi GET
+              const realRes = await fetch(SCRIPT_URL + "?callback=?", { 
+                method: 'POST', 
+                body: JSON.stringify({ function: func, arguments: args }) 
+              });
+              const data = await realRes.json();
+              if (this.success) this.success(data);
+            } catch (err) {
+              console.error("Ralat Sambungan:", err);
+              // Jika gagal, cuba panggil sekali lagi (beberapa kali GAS lambat respon)
+              if (this.failure) this.failure(err);
+              else {
+                document.getElementById('loader').innerHTML = `<p class="text-red-600 font-bold p-4 text-center">Ralat Sambungan. Sila pastikan URL GAS betul & anda telah 'Deploy' sebagai Anyone.</p>`;
               }
-            },
-            getInitialData: function() { this._call('getInitialData'); },
-            saveRecord: function(data) { this._call('saveRecord', data); },
-            getAdminData: function() { this._call('getAdminData'); },
-            deleteRecord: function(id) { this._call('deleteRecord', id); },
-            addTeacher: function(n, j) { this._call('addTeacher', n, j); }
-          }
+            }
+          },
+          getInitialData: function() { this._call('getInitialData'); },
+          saveRecord: function(d) { this._call('saveRecord', d); },
+          getAdminData: function() { this._call('getAdminData'); },
+          deleteRecord: function(id) { this._call('deleteRecord', id); },
+          addTeacher: function(n, j) { this._call('addTeacher', n, j); }
         }
-      };
-    }
+      }
+    };
 
     let masterGuru = [];
     let masterRekod = [];
@@ -230,12 +223,9 @@
       document.getElementById('view-user').classList.add('hidden');
       document.getElementById('view-admin-login').classList.add('hidden');
       document.getElementById('view-admin-main').classList.add('hidden');
-      
       document.getElementById(`view-${view}`).classList.remove('hidden');
-      
       document.getElementById('btnAdminView').classList.toggle('hidden', view !== 'user');
       document.getElementById('btnUserView').classList.toggle('hidden', view === 'user');
-      
       if(view === 'admin-main') refreshRecords();
     }
 
@@ -287,7 +277,6 @@
       e.preventDefault();
       const fd = new FormData(e.target);
       const data = Object.fromEntries(fd.entries());
-      
       showLoading(true);
       google.script.run.withSuccessHandler(() => {
         showLoading(false);
@@ -301,9 +290,7 @@
       if(document.getElementById('adminPass').value === 'Admin0123') {
         toggleView('admin-main');
         showAdminTab('dashboard');
-      } else {
-        alert('Kata laluan salah!');
-      }
+      } else { alert('Kata laluan salah!'); }
     }
 
     function logoutAdmin() {
@@ -344,13 +331,11 @@
       const today = new Date();
       today.setHours(0,0,0,0);
       let counts = { 'KELUAR WAKTU BEKERJA / URUSAN DALAMAN': 0, 'URUSAN RASMI': 0, 'CUTI': 0 };
-      
       masterRekod.forEach(r => {
         const start = parseDate(r['Tarikh Mula']);
         const end = parseDate(r['Tarikh Tamat'] || r['Tarikh Mula']);
         if(today >= start && today <= end) counts[r['Urusan Keberadaan']]++;
       });
-
       document.getElementById('stat-dalaman').innerText = counts['KELUAR WAKTU BEKERJA / URUSAN DALAMAN'];
       document.getElementById('stat-rasmi').innerText = counts['URUSAN RASMI'];
       document.getElementById('stat-cuti').innerText = counts['CUTI'];
@@ -363,21 +348,15 @@
       const targetDate = filterDate ? formatDateDisplay(filterDate) : null;
       const tbody = document.getElementById('tableRecords');
       tbody.innerHTML = '';
-
       const filtered = masterRekod.filter(r => {
         const matchType = !filterType || r['Urusan Keberadaan'] === filterType;
         const matchDate = !targetDate || r['Tarikh Mula'] === targetDate || (parseDate(targetDate) >= parseDate(r['Tarikh Mula']) && parseDate(targetDate) <= parseDate(r['Tarikh Tamat'] || r['Tarikh Mula']));
         return matchType && matchDate;
       });
-
       filtered.forEach(r => {
         const tr = document.createElement('tr');
         tr.className = "border-b text-xs";
-        tr.innerHTML = `
-          <td class="p-3 font-medium">${r['Nama']}</td>
-          <td class="p-3">${r['Urusan Keberadaan']}</td>
-          <td class="p-3">${r['Tarikh Mula']}</td>
-          <td class="p-3"><button onclick="deleteRec('${r['ID Rekod']}')" class="text-red-500">Padam</button></td>`;
+        tr.innerHTML = `<td class="p-3 font-medium">${r['Nama']}</td><td class="p-3">${r['Urusan Keberadaan']}</td><td class="p-3">${r['Tarikh Mula']}</td><td class="p-3"><button onclick="deleteRec('${r['ID Rekod']}')" class="text-red-500">Padam</button></td>`;
         tbody.appendChild(tr);
       });
     }
@@ -409,21 +388,15 @@
       document.getElementById('print-subtitle').innerText = `Tarikh: ${targetDate} | Kategori: ${filterType || "Semua"}`;
       const tbody = document.getElementById('print-tbody');
       tbody.innerHTML = '';
-
       const filtered = masterRekod.filter(r => {
         const targetDateFmt = filterDate ? formatDateDisplay(filterDate) : null;
         const matchType = !filterType || r['Urusan Keberadaan'] === filterType;
         const matchDate = !targetDateFmt || r['Tarikh Mula'] === targetDateFmt || (parseDate(targetDateFmt) >= parseDate(r['Tarikh Mula']) && parseDate(targetDateFmt) <= parseDate(r['Tarikh Tamat'] || r['Tarikh Mula']));
         return matchType && matchDate;
       });
-
       filtered.forEach(r => {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td class="border border-gray-400 p-2">${r['Nama']}</td>
-          <td class="border border-gray-400 p-2">${r['Urusan Keberadaan']}</td>
-          <td class="border border-gray-400 p-2 text-xs">${r['Catatan'] || '-'}</td>
-          <td class="border border-gray-400 p-2 text-xs">${r['Tarikh Mula']}</td>`;
+        tr.innerHTML = `<td class="border border-gray-400 p-2">${r['Nama']}</td><td class="border border-gray-400 p-2">${r['Urusan Keberadaan']}</td><td class="border border-gray-400 p-2 text-xs">${r['Catatan'] || '-'}</td><td class="border border-gray-400 p-2 text-xs">${r['Tarikh Mula']}</td>`;
         tbody.appendChild(tr);
       });
       window.print();
