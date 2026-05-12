@@ -102,14 +102,15 @@
 
       <div id="tab-rekod" class="admin-tab hidden">
         <div class="flex flex-wrap gap-2 mb-4">
-          <input type="date" id="filterDate" onchange="refreshRecords()" class="p-2 border rounded-lg text-sm">
-          <select id="filterType" onchange="refreshRecords()" class="p-2 border rounded-lg text-sm">
+          <input type="date" id="filterDate" onchange="renderTable()" class="p-2 border rounded-lg text-sm">
+          <select id="filterType" onchange="renderTable()" class="p-2 border rounded-lg text-sm">
             <option value="">Semua Urusan</option>
             <option value="KELUAR WAKTU BEKERJA / URUSAN DALAMAN">Urusan Dalaman</option>
             <option value="URUSAN RASMI">Urusan Rasmi</option>
             <option value="CUTI">Cuti</option>
           </select>
           <button onclick="printFilteredData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm">Cetak Laporan</button>
+          <button onclick="refreshRecords()" class="bg-gray-500 text-white px-4 py-2 rounded-lg text-sm">Muat Semula</button>
         </div>
         <div class="overflow-x-auto bg-white rounded-lg border shadow-sm">
           <table class="w-full text-left text-sm">
@@ -154,6 +155,7 @@
   <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwfBxp9f-b1ejtW8EOR3C79MXSzBQnMczSBtLm4eng1GaXK6buW-uI6LQM5g70WeCeMrA/exec";
 
+    // Membaiki fungsi panggilan GAS daripada Vercel
     window.google = {
       script: {
         run: {
@@ -161,26 +163,22 @@
           withFailureHandler: function(cb) { this.failure = cb; return this; },
           _call: async function(func, ...args) {
             try {
+              // Guna satu panggilan POST sahaja dengan redirect
               const res = await fetch(SCRIPT_URL, {
                 method: 'POST',
-                mode: 'no-cors', // Penting untuk mengelakkan isu preflight CORS pada GAS
-                body: JSON.stringify({ function: func, arguments: args })
+                body: JSON.stringify({ function: func, arguments: args }),
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' }
               });
               
-              // Kerana 'no-cors' tidak membenarkan membaca respon, 
-              // kita buat 'real' fetch untuk mendapatkan data bagi fungsi GET
-              const realRes = await fetch(SCRIPT_URL + "?callback=?", { 
-                method: 'POST', 
-                body: JSON.stringify({ function: func, arguments: args }) 
-              });
-              const data = await realRes.json();
+              const data = await res.json();
               if (this.success) this.success(data);
             } catch (err) {
               console.error("Ralat Sambungan:", err);
-              // Jika gagal, cuba panggil sekali lagi (beberapa kali GAS lambat respon)
               if (this.failure) this.failure(err);
               else {
-                document.getElementById('loader').innerHTML = `<p class="text-red-600 font-bold p-4 text-center">Ralat Sambungan. Sila pastikan URL GAS betul & anda telah 'Deploy' sebagai Anyone.</p>`;
+                // Sembunyikan loader jika ralat dan paparkan mesej
+                showLoading(false);
+                alert("Ralat menyambung ke database. Sila pastikan Apps Script anda di-'Deploy' sebagai 'Anyone' dan URL adalah betul.");
               }
             }
           },
@@ -239,36 +237,36 @@
 
       if(val === 'KELUAR WAKTU BEKERJA / URUSAN DALAMAN') {
         html = `
-          <input type="text" name="urusanKeluar" placeholder="Urusan Keluar (Contoh: Klinik)" required class="w-full p-2 border rounded">
+          <input type="text" name="urusanKeluar" placeholder="Urusan Keluar (Contoh: Klinik)" required class="w-full p-3 border rounded-lg bg-gray-50">
           <div><label class="block text-xs font-bold mb-1">Tarikh</label><input type="date" name="tarikhMula" required class="w-full p-2 border rounded"></div>
           <div class="grid grid-cols-2 gap-4">
             <div><label class="block text-xs font-bold mb-1">Masa Keluar</label><input type="time" name="masaKeluar" required class="w-full p-2 border rounded"></div>
             <div><label class="block text-xs font-bold mb-1">Masa Masuk</label><input type="time" name="masaMasuk" required class="w-full p-2 border rounded"></div>
           </div>
-          <textarea name="catatan" placeholder="Catatan" class="w-full p-2 border rounded"></textarea>`;
+          <textarea name="catatan" placeholder="Catatan Tambahan" class="w-full p-3 border rounded-lg bg-gray-50"></textarea>`;
       } else if(val === 'URUSAN RASMI') {
         html = `
-          <select name="jenisUrusan" required class="w-full p-2 border rounded">
+          <select name="jenisUrusan" required class="w-full p-3 border rounded-lg bg-gray-50">
             <option value="MESYUARAT">MESYUARAT</option><option value="BENGKEL">BENGKEL</option>
             <option value="PROGRAM">PROGRAM</option><option value="KURSUS">KURSUS</option><option value="TAKLIMAT">TAKLIMAT</option>
           </select>
-          <input type="text" name="namaProgram" placeholder="Nama Program" required class="w-full p-2 border rounded">
+          <input type="text" name="namaProgram" placeholder="Nama Program" required class="w-full p-3 border rounded-lg bg-gray-50">
           ${commonDate}
           <div class="grid grid-cols-2 gap-4">
-            <input type="text" name="tempat" placeholder="Tempat" class="p-2 border rounded">
-            <input type="text" name="anjuran" placeholder="Anjuran" class="p-2 border rounded">
+            <input type="text" name="tempat" placeholder="Tempat" class="p-3 border rounded-lg bg-gray-50">
+            <input type="text" name="anjuran" placeholder="Anjuran" class="p-3 border rounded-lg bg-gray-50">
           </div>
-          <textarea name="catatan" placeholder="Catatan" class="w-full p-2 border rounded"></textarea>`;
+          <textarea name="catatan" placeholder="Catatan" class="w-full p-3 border rounded-lg bg-gray-50"></textarea>`;
       } else if(val === 'CUTI') {
         html = `
-          <select name="jenisCuti" required class="w-full p-2 border rounded">
+          <select name="jenisCuti" required class="w-full p-3 border rounded-lg bg-gray-50">
             <option value="CUTI SAKIT">CUTI SAKIT</option><option value="CUTI BERSALIN">CUTI BERSALIN</option>
             <option value="CUTI KUARANTIN">CUTI KUARANTIN</option><option value="CTR">CTR</option>
             <option value="CRK">CRK</option><option value="CUTI SEPARUH / TANPA GAJI">CUTI SEPARUH / TANPA GAJI</option>
             <option value="CUTI REHAT">CUTI REHAT</option>
           </select>
           ${commonDate}
-          <textarea name="catatan" placeholder="Catatan" class="w-full p-2 border rounded"></textarea>`;
+          <textarea name="catatan" placeholder="Catatan" class="w-full p-3 border rounded-lg bg-gray-50"></textarea>`;
       }
       container.innerHTML = html;
     }
@@ -277,10 +275,15 @@
       e.preventDefault();
       const fd = new FormData(e.target);
       const data = Object.fromEntries(fd.entries());
+      
+      // Semakan nama guru wujud
+      const namaWujud = masterGuru.some(g => g.nama === data.nama);
+      if(!namaWujud) return alert("Nama guru tidak wujud dalam senarai. Sila pilih daripada cadangan yang keluar.");
+
       showLoading(true);
       google.script.run.withSuccessHandler(() => {
         showLoading(false);
-        alert('Rekod berjaya disimpan!');
+        alert('Rekod keberadaan berjaya disimpan!');
         e.target.reset();
         document.getElementById('dynamicFields').innerHTML = '';
       }).saveRecord(data);
@@ -303,6 +306,7 @@
       document.getElementById(`tab-${tab}`).classList.remove('hidden');
       document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('bg-blue-600', 'text-white'));
       document.getElementById(`btn-${tab}`).classList.add('bg-blue-600', 'text-white');
+      if(tab === 'rekod') renderTable();
     }
 
     function refreshRecords() {
@@ -324,6 +328,7 @@
     function parseDate(str) {
       if (!str) return new Date(0);
       const parts = str.split('-');
+      // dd-mm-yyyy
       return new Date(parts[2], parts[1] - 1, parts[0]);
     }
 
@@ -331,11 +336,14 @@
       const today = new Date();
       today.setHours(0,0,0,0);
       let counts = { 'KELUAR WAKTU BEKERJA / URUSAN DALAMAN': 0, 'URUSAN RASMI': 0, 'CUTI': 0 };
+      
       masterRekod.forEach(r => {
         const start = parseDate(r['Tarikh Mula']);
-        const end = parseDate(r['Tarikh Tamat'] || r['Tarikh Mula']);
+        const endStr = r['Tarikh Tamat'] || r['Tarikh Mula'];
+        const end = parseDate(endStr);
         if(today >= start && today <= end) counts[r['Urusan Keberadaan']]++;
       });
+      
       document.getElementById('stat-dalaman').innerText = counts['KELUAR WAKTU BEKERJA / URUSAN DALAMAN'];
       document.getElementById('stat-rasmi').innerText = counts['URUSAN RASMI'];
       document.getElementById('stat-cuti').innerText = counts['CUTI'];
@@ -346,23 +354,36 @@
       const filterDate = document.getElementById('filterDate').value;
       const filterType = document.getElementById('filterType').value;
       const targetDate = filterDate ? formatDateDisplay(filterDate) : null;
+      
       const tbody = document.getElementById('tableRecords');
       tbody.innerHTML = '';
+      
       const filtered = masterRekod.filter(r => {
         const matchType = !filterType || r['Urusan Keberadaan'] === filterType;
         const matchDate = !targetDate || r['Tarikh Mula'] === targetDate || (parseDate(targetDate) >= parseDate(r['Tarikh Mula']) && parseDate(targetDate) <= parseDate(r['Tarikh Tamat'] || r['Tarikh Mula']));
         return matchType && matchDate;
       });
+
+      if(filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-gray-400 italic">Tiada rekod ditemui</td></tr>`;
+        return;
+      }
+
       filtered.forEach(r => {
         const tr = document.createElement('tr');
-        tr.className = "border-b text-xs";
-        tr.innerHTML = `<td class="p-3 font-medium">${r['Nama']}</td><td class="p-3">${r['Urusan Keberadaan']}</td><td class="p-3">${r['Tarikh Mula']}</td><td class="p-3"><button onclick="deleteRec('${r['ID Rekod']}')" class="text-red-500">Padam</button></td>`;
+        tr.className = "border-b text-xs hover:bg-gray-50 transition";
+        tr.innerHTML = `
+          <td class="p-3 font-medium">${r['Nama']}</td>
+          <td class="p-3">${r['Urusan Keberadaan']}</td>
+          <td class="p-3">${r['Tarikh Mula']} ${r['Tarikh Tamat'] && r['Tarikh Tamat'] !== r['Tarikh Mula'] ? ' -> ' + r['Tarikh Tamat'] : ''}</td>
+          <td class="p-3"><button onclick="deleteRec('${r['ID Rekod']}')" class="text-red-500 font-semibold hover:underline">Padam</button></td>
+        `;
         tbody.appendChild(tr);
       });
     }
 
     function deleteRec(id) {
-      if(confirm('Padam rekod ini?')) {
+      if(confirm('Adakah anda pasti untuk memadam rekod ini?')) {
         showLoading(true);
         google.script.run.withSuccessHandler(() => refreshRecords()).deleteRecord(id);
       }
@@ -371,10 +392,10 @@
     function submitNewTeacher() {
       const n = document.getElementById('newGuruNama').value;
       const j = document.getElementById('newGuruJawatan').value;
-      if(!n) return alert('Nama diperlukan');
+      if(!n) return alert('Nama guru diperlukan');
       showLoading(true);
       google.script.run.withSuccessHandler(() => {
-        alert('Guru ditambah!');
+        alert('Guru berjaya ditambah!');
         document.getElementById('newGuruNama').value = '';
         document.getElementById('newGuruJawatan').value = '';
         refreshRecords();
@@ -385,18 +406,31 @@
       const filterDate = document.getElementById('filterDate').value;
       const filterType = document.getElementById('filterType').value;
       const targetDate = filterDate ? formatDateDisplay(filterDate) : "Semua Tarikh";
-      document.getElementById('print-subtitle').innerText = `Tarikh: ${targetDate} | Kategori: ${filterType || "Semua"}`;
+      
+      document.getElementById('print-subtitle').innerText = `Tarikh: ${targetDate} | Kategori: ${filterType || "Semua Urusan"}`;
       const tbody = document.getElementById('print-tbody');
       tbody.innerHTML = '';
+      
       const filtered = masterRekod.filter(r => {
         const targetDateFmt = filterDate ? formatDateDisplay(filterDate) : null;
         const matchType = !filterType || r['Urusan Keberadaan'] === filterType;
         const matchDate = !targetDateFmt || r['Tarikh Mula'] === targetDateFmt || (parseDate(targetDateFmt) >= parseDate(r['Tarikh Mula']) && parseDate(targetDateFmt) <= parseDate(r['Tarikh Tamat'] || r['Tarikh Mula']));
         return matchType && matchDate;
       });
+
       filtered.forEach(r => {
+        let details = "";
+        if(r['Urusan Keberadaan'] === 'URUSAN RASMI') details = `${r['Jenis Urusan']}: ${r['Nama Program']}`;
+        else if(r['Urusan Keberadaan'] === 'CUTI') details = r['Jenis Cuti'];
+        else details = r['Urusan Keluar'];
+
         const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="border border-gray-400 p-2">${r['Nama']}</td><td class="border border-gray-400 p-2">${r['Urusan Keberadaan']}</td><td class="border border-gray-400 p-2 text-xs">${r['Catatan'] || '-'}</td><td class="border border-gray-400 p-2 text-xs">${r['Tarikh Mula']}</td>`;
+        tr.innerHTML = `
+          <td class="border border-gray-400 p-2">${r['Nama']}</td>
+          <td class="border border-gray-400 p-2 text-xs">${r['Urusan Keberadaan']}</td>
+          <td class="border border-gray-400 p-2 text-xs">${details}<br><small>${r['Catatan'] || ''}</small></td>
+          <td class="border border-gray-400 p-2 text-xs">${r['Tarikh Mula']}</td>
+        `;
         tbody.appendChild(tr);
       });
       window.print();
